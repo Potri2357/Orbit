@@ -93,7 +93,7 @@ export const OrderDetailDrawer = () => {
       onClick={() => setActiveDrawer(null)}
     >
       <div
-        className="glass-panel"
+        className="glass-panel orbit-drawer"
         style={{
           width: '520px',
           maxWidth: '92vw',

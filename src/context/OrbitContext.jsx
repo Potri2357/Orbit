@@ -36,9 +36,6 @@ export const OrbitProvider = ({ children }) => {
   const [activeView, setActiveView] = useState('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
-  // Ravi Warehouse Mobile Mode
-  const [isWarehouseMobileMode, setIsWarehouseMobileMode] = useState(false);
-
   // Active Persona
   const [activePersona, setActivePersona] = useState(TEAM_MEMBERS[1]); // Arjun (Ops Manager)
 
@@ -429,8 +426,6 @@ export const OrbitProvider = ({ children }) => {
     setActiveView,
     sidebarCollapsed,
     setSidebarCollapsed,
-    isWarehouseMobileMode,
-    setIsWarehouseMobileMode,
     activePersona,
     setActivePersona,
     channels,

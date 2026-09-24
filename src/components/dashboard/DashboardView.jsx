@@ -217,7 +217,7 @@ export const DashboardView = () => {
       </div>
 
       {/* Main Grid: Channel Breakdown Chart & Activity Feed */}
-      <div style={{
+      <div className="dashboard-main-grid" style={{
         display: 'grid',
         gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)',
         gap: '20px'

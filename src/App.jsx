@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { OrbitProvider, useOrbit } from './context/OrbitContext';
 import { Header } from './components/common/Header';
 import { Sidebar } from './components/common/Sidebar';
+import { MobileTabBar } from './components/common/MobileTabBar';
 import { ToastContainer } from './components/common/ToastContainer';
 import { CommandPalette } from './components/common/CommandPalette';
 import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsModal';
@@ -12,10 +13,10 @@ import { AccountingView } from './components/accounting/AccountingView';
 import { ChannelsView } from './components/channels/ChannelsView';
 import { TeamView } from './components/team/TeamView';
 import { SettingsView } from './components/settings/SettingsView';
-import { WarehouseMobileView } from './components/warehouse/WarehouseMobileView';
 
 const MainLayout = () => {
-  const { activeView, isWarehouseMobileMode } = useOrbit();
+  const { activeView } = useOrbit();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const renderActiveView = () => {
     switch (activeView) {
@@ -39,12 +40,15 @@ const MainLayout = () => {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', width: '100%', position: 'relative' }}>
-      {/* Persistent Left Navigation Rail */}
-      <Sidebar />
+    <div className="orbit-app-layout" style={{ display: 'flex', minHeight: '100vh', width: '100%', position: 'relative' }}>
+      {/* Persistent Left Navigation Rail / Mobile Drawer */}
+      <Sidebar
+        isMobileOpen={isMobileMenuOpen}
+        onCloseMobile={() => setIsMobileMenuOpen(false)}
+      />
 
       {/* Main Workspace Column */}
-      <div style={{
+      <div className="orbit-main-column" style={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
@@ -52,9 +56,9 @@ const MainLayout = () => {
         height: '100vh',
         overflowY: 'auto'
       }}>
-        <Header />
+        <Header onToggleMobileSidebar={() => setIsMobileMenuOpen(prev => !prev)} />
 
-        <main style={{
+        <main className="orbit-main-content" style={{
           flex: 1,
           padding: '20px 24px 48px 24px',
           maxWidth: '1600px',
@@ -64,8 +68,8 @@ const MainLayout = () => {
         </main>
       </div>
 
-      {/* Ravi's Dedicated Warehouse Mode Overlay */}
-      {isWarehouseMobileMode && <WarehouseMobileView />}
+      {/* Mobile Bottom Tab Bar */}
+      <MobileTabBar onOpenMenu={() => setIsMobileMenuOpen(true)} />
 
       {/* Global Interactive Overlays */}
       <CommandPalette />

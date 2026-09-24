@@ -7,24 +7,18 @@ import {
   Sun,
   Zap,
   HelpCircle,
-  Smartphone,
+  Menu,
   ChevronDown,
   RefreshCw,
-  Bell,
-  Sliders,
   CheckCircle2
 } from 'lucide-react';
 
-export const Header = () => {
+export const Header = ({ onToggleMobileSidebar }) => {
   const {
     theme,
     toggleTheme,
     activePersona,
     setActivePersona,
-    isWarehouseMobileMode,
-    setIsWarehouseMobileMode,
-    isLiveSimulating,
-    setIsLiveSimulating,
     simulateIncomingSale,
     syncAllChannels,
     setIsCommandPaletteOpen,
@@ -42,18 +36,27 @@ export const Header = () => {
   };
 
   return (
-    <header className="glass-panel" style={{
+    <header className="glass-panel orbit-header" style={{
       margin: '12px 16px 0 16px',
-      padding: '10px 20px',
+      padding: '10px 16px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: '16px',
+      gap: '12px',
       zIndex: 40,
       position: 'relative'
     }}>
-      {/* Left: Global Search / Command Bar Trigger */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, maxWidth: '440px' }}>
+      {/* Left: Mobile Menu Toggle + Global Search */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, maxWidth: '480px' }}>
+        <button
+          onClick={onToggleMobileSidebar}
+          className="btn-ghost mobile-menu-btn"
+          style={{ padding: '6px', borderRadius: 'var(--radius-sm)' }}
+          title="Open Navigation Menu"
+        >
+          <Menu size={20} />
+        </button>
+
         <button
           onClick={() => setIsCommandPaletteOpen(true)}
           className="neu-inset-container"
@@ -72,8 +75,8 @@ export const Header = () => {
           title="Open Command Palette (⌘K)"
         >
           <Search size={16} color="var(--ink-500)" />
-          <span style={{ flex: 1, textAlign: 'left' }}>Search orders, SKUs, customers, actions...</span>
-          <kbd style={{
+          <span className="search-placeholder-text" style={{ flex: 1, textAlign: 'left' }}>Search orders, SKUs, actions...</span>
+          <kbd className="header-kbd" style={{
             background: 'var(--surface-raised)',
             padding: '2px 6px',
             borderRadius: '4px',
@@ -88,14 +91,12 @@ export const Header = () => {
         </button>
       </div>
 
-      {/* Center: Live Sync Pulse Status & Frappe Backend Status */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-
-
+      {/* Center / Action Buttons */}
+      <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {/* Quick Sync Button */}
         <button
           onClick={handleManualSync}
-          className="btn-ghost"
+          className="btn-ghost header-sync-btn"
           style={{
             padding: '6px 10px',
             fontSize: '12px',
@@ -104,7 +105,7 @@ export const Header = () => {
           title="Force verify inventory across all 4 channels"
         >
           <RefreshCw size={14} className={isSyncing ? 'spin-anim' : ''} />
-          <span>Sync</span>
+          <span className="header-btn-text">Sync</span>
         </button>
 
         {/* Real-time Order Simulation Trigger */}
@@ -115,9 +116,10 @@ export const Header = () => {
             padding: '6px 12px',
             fontSize: '12px',
             fontWeight: 600,
-            borderRadius: 'var(--radius-md)'
+            borderRadius: 'var(--radius-md)',
+            whiteSpace: 'nowrap'
           }}
-          title="Trigger a simulated real-time order from Shopify/Instagram to test live pulse & inventory decrement"
+          title="Trigger a simulated real-time order from Shopify/Instagram"
         >
           <Zap size={14} />
           <span>Simulate Sale</span>
@@ -125,22 +127,7 @@ export const Header = () => {
       </div>
 
       {/* Right: Controls & Persona Switcher */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        {/* Warehouse Mobile View Mode Toggle */}
-        <button
-          onClick={() => setIsWarehouseMobileMode(prev => !prev)}
-          className={isWarehouseMobileMode ? 'btn-primary' : 'btn-secondary'}
-          style={{
-            padding: '6px 12px',
-            fontSize: '12px',
-            borderRadius: 'var(--radius-md)'
-          }}
-          title="Switch to Ravi's mobile/tablet warehouse packing & scanner view (PRD §8.5)"
-        >
-          <Smartphone size={14} />
-          <span>{isWarehouseMobileMode ? 'Exit Mobile' : 'Warehouse Mobile'}</span>
-        </button>
-
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {/* Theme Toggle (Light / Dark) */}
         <button
           onClick={toggleTheme}
@@ -158,14 +145,14 @@ export const Header = () => {
         {/* Shortcuts Help */}
         <button
           onClick={() => setIsShortcutsModalOpen(true)}
-          className="btn-ghost"
+          className="btn-ghost header-help-btn"
           style={{ padding: '6px', borderRadius: 'var(--radius-md)' }}
           title="Keyboard shortcuts (?)"
         >
           <HelpCircle size={17} />
         </button>
 
-        <div style={{ width: '1px', height: '22px', background: 'var(--border-subtle)', margin: '0 2px' }} />
+        <div className="header-divider" style={{ width: '1px', height: '22px', background: 'var(--border-subtle)', margin: '0 2px' }} />
 
         {/* Persona Switcher Dropdown */}
         <div style={{ position: 'relative' }}>
@@ -244,9 +231,6 @@ export const Header = () => {
                       onClick={() => {
                         setActivePersona(member);
                         setIsPersonaMenuOpen(false);
-                        if (member.id === 'u-4') {
-                          setIsWarehouseMobileMode(true);
-                        }
                       }}
                       style={{
                         display: 'flex',

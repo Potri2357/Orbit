@@ -653,3 +653,171 @@ html, body {
   animation: spin 0.8s linear infinite;
 }
 
+/* ==========================================================================
+   Mobile Responsive Navigation & Layout System
+   ========================================================================== */
+
+/* Base defaults for desktop */
+.mobile-menu-btn {
+  display: none !important;
+}
+
+.sidebar-mobile-close {
+  display: none !important;
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 14, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 998;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Tablet & Mobile Screens (< 768px) */
+@media (max-width: 768px) {
+  /* Show Mobile Bottom Navigation Tab Bar */
+  .mobile-tab-bar {
+    display: flex !important;
+  }
+
+  /* Show Hamburger Menu Toggle in Header */
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+
+  /* Show Close 'X' Button in Sidebar Drawer */
+  .sidebar-mobile-close {
+    display: flex !important;
+  }
+
+  /* Turn Persistent Desktop Sidebar Rail into Slide-Over Mobile Drawer */
+  .orbit-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+    width: 280px !important;
+    min-width: 280px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: 1px solid var(--border-medium) !important;
+    z-index: 1000 !important;
+    transform: translateX(-100%) !important;
+    box-shadow: none !important;
+  }
+
+  .orbit-sidebar.mobile-open {
+    transform: translateX(0) !important;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.45) !important;
+  }
+
+  /* Hide Desktop Rail Collapse Chevron on Mobile */
+  .sidebar-collapse-btn {
+    display: none !important;
+  }
+
+  /* Adjust Main Content Container to Avoid Bottom Tab Bar Overlap */
+  .orbit-main-content {
+    padding: 12px 14px 84px 14px !important;
+  }
+
+  /* Header adjustments on mobile */
+  .orbit-header {
+    margin: 8px 10px 0 10px !important;
+    padding: 8px 12px !important;
+    gap: 8px !important;
+  }
+
+  .search-placeholder-text {
+    display: none !important;
+  }
+
+  .header-kbd {
+    display: none !important;
+  }
+
+  .header-sync-btn .header-btn-text {
+    display: none !important;
+  }
+
+  .header-help-btn {
+    display: none !important;
+  }
+
+  .header-divider {
+    display: none !important;
+  }
+
+  /* Drawers (Orders, Stock) Full-Width on Mobile */
+  .orbit-drawer {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+
+  /* Dashboard Split Grid Stacking */
+  .dashboard-main-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Modals Centering on Mobile */
+  .glass-panel.modal-content,
+  .neu-card.modal-content {
+    width: calc(100vw - 24px) !important;
+    max-width: 100% !important;
+    margin: 12px !important;
+  }
+
+  /* Tables: Ensure Touch-Friendly Smooth Scrolling */
+  .orbit-table-wrapper {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .orbit-table th,
+  .orbit-table td {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+  }
+}
+
+/* Small Smartphone Screens (< 480px) */
+@media (max-width: 480px) {
+  .display-title {
+    font-size: 26px !important;
+    line-height: 32px !important;
+  }
+
+  .h1-title {
+    font-size: 20px !important;
+    line-height: 26px !important;
+  }
+
+  .h2-title {
+    font-size: 17px !important;
+    line-height: 24px !important;
+  }
+
+  .orbit-main-content {
+    padding: 10px 10px 84px 10px !important;
+  }
+
+  /* Header Persona on tiny screens: hide name, keep avatar */
+  .orbit-header .neu-card > div:not(:first-child) {
+    display: none !important;
+  }
+
+  /* Buttons on Mobile: compact padding */
+  .btn-primary,
+  .btn-secondary {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+}
+
+

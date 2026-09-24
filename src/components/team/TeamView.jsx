@@ -4,7 +4,7 @@ import { TEAM_MEMBERS } from '../../data/mockData';
 import { Users, Shield, Check, Lock, Smartphone, Laptop, Radio } from 'lucide-react';
 
 export const TeamView = () => {
-  const { activePersona, setActivePersona, setIsWarehouseMobileMode, addToast } = useOrbit();
+  const { activePersona, setActivePersona, addToast } = useOrbit();
 
   const PERMISSION_MODULES = [
     { name: 'Dashboard & Founder KPIs', roles: ['Founder / CEO', 'Operations Manager', 'Head of Finance'] },
@@ -92,9 +92,6 @@ export const TeamView = () => {
                 <button
                   onClick={() => {
                     setActivePersona(member);
-                    if (member.id === 'u-4') {
-                      setIsWarehouseMobileMode(true);
-                    }
                     addToast({
                       type: 'info',
                       title: `Active Persona Switched`,

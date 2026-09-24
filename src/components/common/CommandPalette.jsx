@@ -26,8 +26,7 @@ export const CommandPalette = () => {
     simulateIncomingSale,
     syncAllChannels,
     toggleTheme,
-    theme,
-    setIsWarehouseMobileMode
+    theme
   } = useOrbit();
 
   const [query, setQuery] = useState('');
@@ -74,14 +73,7 @@ export const CommandPalette = () => {
       icon: RefreshCw,
       action: () => syncAllChannels()
     },
-    {
-      type: 'action',
-      id: 'warehouse_mode',
-      title: 'Switch to Ravi’s Warehouse View',
-      subtitle: 'Mobile packing queue with barcode scanner simulation',
-      icon: Smartphone,
-      action: () => setIsWarehouseMobileMode(true)
-    },
+
     {
       type: 'action',
       id: 'toggle_theme',

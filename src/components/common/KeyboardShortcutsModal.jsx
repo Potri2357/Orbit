@@ -32,8 +32,7 @@ export const KeyboardShortcutsModal = () => {
         { keys: ['g', 'd'], label: 'Go to Dashboard' },
         { keys: ['g', 'o'], label: 'Go to Orders (List & Kanban)' },
         { keys: ['g', 'i'], label: 'Go to Inventory & Channel Stock' },
-        { keys: ['g', 'a'], label: 'Go to Accounting & GST' },
-        { keys: ['w'], label: 'Toggle Ravi’s Mobile Warehouse View' }
+        { keys: ['g', 'a'], label: 'Go to Accounting & GST' }
       ]
     }
   ];
