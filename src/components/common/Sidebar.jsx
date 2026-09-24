@@ -209,35 +209,7 @@ export const Sidebar = () => {
 
       {/* Bottom Area: Channel Status Strip & Collapse Toggle */}
       <div>
-        {/* Channel Health Mini Indicator */}
-        {!sidebarCollapsed ? (
-          <div
-            className="neu-inset-container"
-            style={{
-              padding: '10px',
-              marginBottom: '10px',
-              fontSize: '11px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span className="label-caps" style={{ fontSize: '10px' }}>Channels Realtime</span>
-              <span style={{ color: 'var(--success-500)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span className="channel-dot shopify" style={{ width: '6px', height: '6px' }} />
-                4 / 4 Live
-              </span>
-            </div>
 
-            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-              <span className="channel-pill shopify" style={{ fontSize: '9px', padding: '1px 5px' }}>Shopify</span>
-              <span className="channel-pill instagram" style={{ fontSize: '9px', padding: '1px 5px' }}>IG</span>
-              <span className="channel-pill marketplace" style={{ fontSize: '9px', padding: '1px 5px' }}>Mkt</span>
-              <span className="channel-pill pos" style={{ fontSize: '9px', padding: '1px 5px' }}>POS</span>
-            </div>
-          </div>
-        ) : null}
 
         {/* User Presence & Collapse Button */}
         <div style={{

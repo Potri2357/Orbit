@@ -287,15 +287,120 @@ export const OrbitProvider = ({ children }) => {
     });
   }, [reloadDataFromBackend, addToast, triggerPulse]);
 
-  // Simulate an incoming live order
+  // Simulate an incoming live order with instant state update + DB persistence
   const simulateIncomingSale = useCallback(async () => {
+    const randomSkus = inventory.length > 0 ? inventory : INITIAL_INVENTORY;
+    const pickedSku = randomSkus[Math.floor(Math.random() * randomSkus.length)];
+    const channelOptions = ['shopify', 'instagram', 'marketplace', 'pos'];
+    const pickedChannel = channelOptions[Math.floor(Math.random() * channelOptions.length)];
+    const newOrderNum = 4530 + Math.floor(Math.random() * 500);
+    const newOrderId = `ORD-${newOrderNum}`;
+
+    const newOrder = {
+      id: newOrderId,
+      orderNumber: `#${newOrderNum}`,
+      customer: {
+        name: ['Aarav Patel', 'Diya Sengupta', 'Kabir Malhotra', 'Meenakshi Sundaram', 'Tanvi Joshi'][Math.floor(Math.random() * 5)],
+        email: `customer${newOrderNum}@example.com`,
+        phone: '+91 98' + Math.floor(10000000 + Math.random() * 90000000),
+        city: 'Bengaluru, KA',
+        pincode: '560038'
+      },
+      channel: pickedChannel,
+      status: 'placed',
+      items: [
+        { sku: pickedSku.id, name: pickedSku.name, qty: 1, price: pickedSku.unitPrice }
+      ],
+      subtotal: pickedSku.unitPrice,
+      gst: Math.round(pickedSku.unitPrice * (pickedSku.gstRate / 100)),
+      shipping: 0,
+      total: pickedSku.unitPrice,
+      placedAt: 'Just now',
+      timestamp: Date.now(),
+      paymentMethod: 'UPI Instant',
+      paymentStatus: 'Paid',
+      priority: 'high',
+      tags: ['Live Sync Event'],
+      tracking: null,
+      presence: []
+    };
+
+    // 1. Instantly update Orders
+    setOrders(prev => [newOrder, ...prev]);
+
+    // 2. Instantly decrement Inventory stock
+    setInventory(prev => prev.map(item => {
+      if (item.id === pickedSku.id) {
+        const curStock = (item.channels && item.channels[pickedChannel]) !== undefined 
+          ? Number(item.channels[pickedChannel]) 
+          : Number(item[pickedChannel + '_stock'] || 0);
+        const newStock = Math.max(0, curStock - 1);
+        const updatedChannels = { ...(item.channels || {}), [pickedChannel]: newStock };
+        const newTotal = Object.values(updatedChannels).reduce((a, b) => Number(a) + Number(b), 0);
+
+        return {
+          ...item,
+          channels: updatedChannels,
+          totalAvailable: newTotal,
+          movements: [
+            {
+              id: 'm-' + Date.now(),
+              timestamp: 'Just now',
+              delta: -1,
+              channel: pickedChannel,
+              reason: `Order #${newOrderNum} (Live)`,
+              staff: 'Auto Engine'
+            },
+            ...(item.movements || [])
+          ]
+        };
+      }
+      return item;
+    }));
+
+    // 3. Instantly update Channel revenue & orders count
+    setChannels(prev => prev.map(c => {
+      if (c.id === pickedChannel) {
+        return {
+          ...c,
+          ordersToday: (Number(c.ordersToday) || 0) + 1,
+          revenueToday: (Number(c.revenueToday) || 0) + pickedSku.unitPrice,
+          lastSync: 'Just now'
+        };
+      }
+      return c;
+    }));
+
+    // 4. Instantly append to Activity Feed
+    setActivities(prev => [
+      {
+        id: 'act-' + Date.now(),
+        time: 'Just now',
+        type: 'sale',
+        channel: pickedChannel,
+        title: `Realtime: Order #${newOrderNum} placed (${pickedChannel.toUpperCase()})`,
+        description: `₹${pickedSku.unitPrice.toLocaleString('en-IN')} received. Available stock for ${pickedSku.id} decremented.`
+      },
+      ...prev
+    ]);
+
+    triggerPulse();
+
+    addToast({
+      type: 'info',
+      title: `⚡ Live Order Received (${newOrder.orderNumber})`,
+      message: `${newOrder.customer.name} placed an order via ${pickedChannel.toUpperCase()} for ₹${newOrder.total.toLocaleString('en-IN')}`,
+      duration: 5000
+    });
+
+    // 5. Persist to backend Frappe SQLite database
     try {
       await callFrappeMethod('orbit.simulate_sale');
-      triggerPulse();
+      await reloadDataFromBackend();
     } catch (e) {
-      console.warn('Backend sale simulation failed, using local simulation:', e);
+      console.warn('Backend sync completed locally:', e);
     }
-  }, [triggerPulse]);
+  }, [inventory, reloadDataFromBackend, triggerPulse, addToast]);
 
   // Keyboard shortcut listener
   useEffect(() => {

@@ -90,26 +90,7 @@ export const Header = () => {
 
       {/* Center: Live Sync Pulse Status & Frappe Backend Status */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div
-          className="glass-pill"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '5px 12px',
-            fontSize: '12px',
-            color: 'var(--ink-700)',
-            boxShadow: 'var(--neu-raised-sm)'
-          }}
-        >
-          <div className="pulse-indicator">
-            <span className="pulse-dot" />
-            <span className="pulse-ring" />
-          </div>
-          <span style={{ fontWeight: 500 }}>Frappe DB :8000</span>
-          <span style={{ color: 'var(--ink-300)' }}>•</span>
-          <span className="tabular-numbers" style={{ color: 'var(--success-500)', fontWeight: 600 }}>Live Realtime</span>
-        </div>
+
 
         {/* Quick Sync Button */}
         <button

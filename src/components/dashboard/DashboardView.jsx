@@ -29,28 +29,18 @@ export const DashboardView = () => {
     lastLivePulse
   } = useOrbit();
 
-  const [isChecklistCollapsed, setIsChecklistCollapsed] = useState(false);
-  const [checklistTasks, setChecklistTasks] = useState([
-    { id: 1, text: 'Connect Primary Shopify Storefront', completed: true },
-    { id: 2, text: 'Synchronize 6 Catalog SKUs & Safety Thresholds', completed: true },
-    { id: 3, text: 'Configure GSTIN (29AABCS1429B1Z0) for Automated Invoicing', completed: true },
-    { id: 4, text: 'Perform First Barcode Packing Simulation via Warehouse View', completed: false }
-  ]);
 
-  const toggleTask = (id) => {
-    setChecklistTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
-  };
 
-  // Metrics
-  const totalRevenueToday = channels.reduce((sum, c) => sum + c.revenueToday, 0);
+  // Metrics with explicit numeric casting
+  const totalRevenueToday = channels.reduce((sum, c) => sum + (Number(c.revenueToday) || 0), 0);
   const ordersInProgress = orders.filter(o => ['placed', 'packed'].includes(o.status)).length;
-  const lowStockItems = inventory.filter(i => i.totalAvailable <= i.threshold);
+  const lowStockItems = inventory.filter(i => (Number(i.totalAvailable) || 0) <= (Number(i.threshold) || 0));
   const pendingFulfillmentAmount = orders
     .filter(o => ['placed', 'packed'].includes(o.status))
-    .reduce((sum, o) => sum + o.total, 0);
+    .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
 
   // Channel breakdown calculation
-  const totalChannelOrders = channels.reduce((sum, c) => sum + c.ordersToday, 0) || 1;
+  const totalChannelOrders = channels.reduce((sum, c) => sum + (Number(c.ordersToday) || 0), 0) || 1;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -85,111 +75,7 @@ export const DashboardView = () => {
         </div>
       </div>
 
-      {/* Guided Setup Checklist (PRD §8.1 Empty/Onboarding State) */}
-      <div
-        className="glass-panel"
-        style={{
-          padding: '16px 20px',
-          borderRadius: 'var(--radius-lg)',
-          borderLeft: '4px solid var(--brand-gold)'
-        }}
-      >
-        <div
-          onClick={() => setIsChecklistCollapsed(prev => !prev)}
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            cursor: 'pointer',
-            userSelect: 'none'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              width: '26px',
-              height: '26px',
-              borderRadius: '50%',
-              background: 'var(--brand-gold-subtle)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--brand-gold)'
-            }}>
-              <Sparkles size={14} />
-            </div>
-            <div>
-              <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ink-900)' }}>
-                Guided Setup & Deployment Checklist
-              </div>
-              <div className="body-small">
-                {checklistTasks.filter(t => t.completed).length} of {checklistTasks.length} milestones completed
-              </div>
-            </div>
-          </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '120px',
-              height: '6px',
-              background: 'var(--surface-sunken)',
-              borderRadius: 'var(--radius-full)',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                height: '100%',
-                width: `${(checklistTasks.filter(t => t.completed).length / checklistTasks.length) * 100}%`,
-                background: 'var(--brand-gold)',
-                transition: 'width 0.3s ease'
-              }} />
-            </div>
-            {isChecklistCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-          </div>
-        </div>
-
-        {!isChecklistCollapsed && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: '12px',
-            marginTop: '16px',
-            paddingTop: '14px',
-            borderTop: '1px solid var(--border-subtle)'
-          }}>
-            {checklistTasks.map(task => (
-              <div
-                key={task.id}
-                onClick={() => toggleTask(task.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '8px 12px',
-                  borderRadius: 'var(--radius-md)',
-                  background: task.completed ? 'var(--surface-sunken)' : 'var(--surface-raised)',
-                  cursor: 'pointer',
-                  border: '1px solid var(--border-subtle)',
-                  transition: 'background 0.15s ease'
-                }}
-              >
-                <div style={{
-                  color: task.completed ? 'var(--success-500)' : 'var(--ink-300)',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}>
-                  <CheckCircle2 size={18} />
-                </div>
-                <span style={{
-                  fontSize: '13px',
-                  color: task.completed ? 'var(--ink-500)' : 'var(--ink-900)',
-                  textDecoration: task.completed ? 'line-through' : 'none'
-                }}>
-                  {task.text}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
       {/* Top Row: 4 Live KPI Cards (PRD §8.1) */}
       <div style={{
