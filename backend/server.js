@@ -470,6 +470,14 @@ process.on('unhandledRejection', (reason, promise) => {
 // Initialize DB and start listening
 initDatabase()
   .then(() => {
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`[Server Error] Port ${PORT} is already in use by another process.`);
+      } else {
+        console.error('[Server Error]:', err);
+      }
+    });
+
     server.listen(PORT, '0.0.0.0', () => {
       console.log(`====================================================`);
       console.log(`🚀 Orbit Frappe-Compliant Backend running on port ${PORT}`);
