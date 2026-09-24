@@ -452,6 +452,21 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Keep-alive heartbeat to ensure event loop never drains
+setInterval(() => {}, 60000);
+
+process.on('exit', (code) => {
+  console.log(`[Process] Server exiting with code: ${code}`);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[UncaughtException]:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[UnhandledRejection]:', reason);
+});
+
 // Initialize DB and start listening
 initDatabase()
   .then(() => {
@@ -468,3 +483,4 @@ initDatabase()
     console.error('Database initialization failed:', err);
     process.exit(1);
   });
+
