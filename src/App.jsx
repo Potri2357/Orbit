@@ -69,7 +69,7 @@ const MainLayout = () => {
       </div>
 
       {/* Mobile Bottom Tab Bar */}
-      <MobileTabBar onOpenMenu={() => setIsMobileMenuOpen(true)} />
+      <MobileTabBar />
 
       {/* Global Interactive Overlays */}
       <CommandPalette />

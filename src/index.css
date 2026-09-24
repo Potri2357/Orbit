@@ -678,7 +678,46 @@ html, body {
 
 /* Tablet & Mobile Screens (< 768px) */
 @media (max-width: 768px) {
-  /* Show Mobile Bottom Navigation Tab Bar */
+  /* ========================================================================
+     Completely Hide Scrollbars on Mobile while preserving smooth touch scrolling
+     ======================================================================== */
+  *::-webkit-scrollbar,
+  ::-webkit-scrollbar,
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  #root::-webkit-scrollbar,
+  div::-webkit-scrollbar,
+  aside::-webkit-scrollbar,
+  main::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
+
+  *,
+  html,
+  body,
+  #root {
+    -ms-overflow-style: none !important;  /* IE and Edge */
+    scrollbar-width: none !important;  /* Firefox */
+  }
+
+  /* Smooth momentum scrolling for mobile touch containers */
+  html,
+  body,
+  #root,
+  .orbit-main-column,
+  .orbit-main-content,
+  .orbit-table-wrapper,
+  .orbit-sidebar,
+  .orbit-drawer {
+    -webkit-overflow-scrolling: touch !important;
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+
+  /* Show Mobile Bottom Navigation Tab Bar (Bento Dock) */
   .mobile-tab-bar {
     display: flex !important;
   }
@@ -723,9 +762,9 @@ html, body {
     display: none !important;
   }
 
-  /* Adjust Main Content Container to Avoid Bottom Tab Bar Overlap */
+  /* Adjust Main Content Container to Avoid Floating Bento Dock Overlap */
   .orbit-main-content {
-    padding: 12px 14px 84px 14px !important;
+    padding: 12px 14px 92px 14px !important;
   }
 
   /* Header adjustments on mobile */
@@ -774,9 +813,17 @@ html, body {
     margin: 12px !important;
   }
 
-  /* Tables: Ensure Touch-Friendly Smooth Scrolling */
+  /* Tables: Ensure Touch-Friendly Smooth Scrolling Without Scrollbars */
   .orbit-table-wrapper {
     -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+
+  .orbit-table-wrapper::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
 
   .orbit-table th,
@@ -784,6 +831,120 @@ html, body {
     padding: 10px 12px !important;
     font-size: 13px !important;
   }
+}
+
+/* ==========================================================================
+   Magnet Bento Dock Component Styling
+   ========================================================================== */
+.mobile-tab-bar.bento-dock {
+  position: fixed !important;
+  bottom: 16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: min(calc(100vw - 24px), 430px) !important;
+  height: 64px !important;
+  background: var(--surface-card) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid var(--border-medium) !important;
+  border-radius: var(--radius-full) !important;
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.28), 0 0 0 1px var(--border-subtle) !important;
+  z-index: 990 !important;
+  padding: 4px 6px !important;
+  margin: 0 !important;
+}
+
+.bento-dock-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.bento-dock-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 100%;
+  flex: 1;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 20px;
+  outline: none;
+  will-change: transform;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  padding: 4px 4px;
+}
+
+.bento-dock-item:active {
+  transform: scale(0.92) !important;
+}
+
+.bento-dock-pill-bg {
+  position: absolute;
+  inset: 2px 4px;
+  background: var(--brand-gold-subtle);
+  border-radius: 16px;
+  border: 1px solid var(--brand-gold-border);
+  z-index: 0;
+  box-shadow: var(--neu-inset);
+  pointer-events: none;
+  animation: fadeIn 0.18s ease;
+}
+
+.bento-icon-wrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+}
+
+.bento-badge {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  color: #FFFFFF;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 10px;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.bento-dock-label {
+  position: relative;
+  z-index: 1;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink-500);
+  line-height: 1.1;
+  transition: color 0.15s ease;
+}
+
+.bento-dock-label.active-text {
+  color: var(--brand-gold);
+  font-weight: 700;
+}
+
+.bento-active-dot {
+  position: absolute;
+  bottom: 3px;
+  width: 4px;
+  height: 4px;
+  background: var(--brand-gold);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--brand-gold);
+  z-index: 1;
 }
 
 /* Small Smartphone Screens (< 480px) */
@@ -804,7 +965,7 @@ html, body {
   }
 
   .orbit-main-content {
-    padding: 10px 10px 84px 10px !important;
+    padding: 10px 10px 92px 10px !important;
   }
 
   /* Header Persona on tiny screens: hide name, keep avatar */
@@ -818,6 +979,13 @@ html, body {
     padding: 6px 10px !important;
     font-size: 12px !important;
   }
+
+  .mobile-tab-bar.bento-dock {
+    width: calc(100vw - 16px) !important;
+    bottom: 12px !important;
+    height: 60px !important;
+  }
 }
+
 
 

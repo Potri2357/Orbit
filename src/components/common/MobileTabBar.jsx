@@ -1,18 +1,22 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useOrbit } from '../../context/OrbitContext';
 import {
   LayoutDashboard,
   ShoppingBag,
   Package,
   Receipt,
-  Menu
+  Share2
 } from 'lucide-react';
 
-export const MobileTabBar = ({ onOpenMenu }) => {
-  const { activeView, setActiveView, orders, inventory } = useOrbit();
+export const MobileTabBar = () => {
+  const { activeView, setActiveView, orders, inventory, channels } = useOrbit();
+  const dockRef = useRef(null);
+  const [pointerX, setPointerX] = useState(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   const ordersInProgress = orders.filter(o => ['placed', 'packed'].includes(o.status)).length;
   const lowStockCount = inventory.filter(i => (Number(i.totalAvailable) || 0) <= (Number(i.threshold) || 0)).length;
+  const activeChannelsCount = channels.filter(c => c.status === 'connected').length;
 
   const TABS = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
@@ -20,125 +24,120 @@ export const MobileTabBar = ({ onOpenMenu }) => {
       id: 'orders',
       label: 'Orders',
       icon: ShoppingBag,
-      badge: ordersInProgress > 0 ? ordersInProgress : null
+      badge: ordersInProgress > 0 ? ordersInProgress : null,
+      badgeColor: 'var(--warning-500)'
     },
     {
       id: 'inventory',
       label: 'Stock',
       icon: Package,
-      badge: lowStockCount > 0 ? lowStockCount : null
+      badge: lowStockCount > 0 ? lowStockCount : null,
+      badgeColor: 'var(--error-500)'
     },
-    { id: 'accounting', label: 'Finance', icon: Receipt }
+    { id: 'accounting', label: 'Finance', icon: Receipt },
+    {
+      id: 'channels',
+      label: 'Channels',
+      icon: Share2,
+      badge: activeChannelsCount > 0 ? `${activeChannelsCount}` : null,
+      badgeColor: 'var(--success-500)'
+    }
   ];
+
+  // Magnetic cursor & touch tracking
+  const handlePointerMove = (e) => {
+    if (!dockRef.current) return;
+    const rect = dockRef.current.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    setPointerX(clientX - rect.left);
+    setIsHovered(true);
+  };
+
+  const handlePointerLeave = () => {
+    setPointerX(null);
+    setIsHovered(false);
+  };
 
   return (
     <nav
-      className="mobile-tab-bar glass-panel"
-      style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: '62px',
-        zIndex: 90,
-        borderRadius: '0',
-        borderTop: '1px solid var(--border-medium)',
-        display: 'none', // Overridden to flex in @media (max-width: 768px)
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        padding: '0 4px',
-        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.12)',
-        background: 'var(--surface-raised)'
-      }}
+      ref={dockRef}
+      onMouseMove={handlePointerMove}
+      onMouseLeave={handlePointerLeave}
+      onTouchMove={handlePointerMove}
+      onTouchEnd={handlePointerLeave}
+      className="mobile-tab-bar bento-dock"
+      aria-label="Mobile Navigation Dock"
     >
-      {TABS.map(tab => {
-        const Icon = tab.icon;
-        const isActive = activeView === tab.id;
+      <div className="bento-dock-inner">
+        {TABS.map((tab, idx) => {
+          const Icon = tab.icon;
+          const isActive = activeView === tab.id;
 
-        return (
-          <button
-            key={tab.id}
-            onClick={() => setActiveView(tab.id)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '3px',
-              padding: '6px 10px',
-              flex: 1,
-              position: 'relative',
-              cursor: 'pointer',
-              color: isActive ? 'var(--brand-gold)' : 'var(--ink-500)',
-              transition: 'color 0.15s ease'
-            }}
-          >
-            <div style={{ position: 'relative' }}>
-              <Icon size={20} strokeWidth={isActive ? 2.4 : 1.8} />
-              {tab.badge && (
-                <span style={{
-                  position: 'absolute',
-                  top: '-4px',
-                  right: '-8px',
-                  background: 'var(--error-500)',
-                  color: '#FFFFFF',
-                  fontSize: '9px',
-                  fontWeight: 700,
-                  padding: '1px 4px',
-                  borderRadius: '10px',
-                  lineHeight: 1
-                }}>
-                  {tab.badge}
-                </span>
-              )}
-            </div>
+          // Compute magnetic magnification based on pointer proximity
+          let scale = 1;
+          let translateY = 0;
+          let magneticX = 0;
 
-            <span style={{
-              fontSize: '11px',
-              fontWeight: isActive ? 700 : 500
-            }}>
-              {tab.label}
-            </span>
+          if (pointerX !== null && dockRef.current) {
+            const dockWidth = dockRef.current.offsetWidth;
+            const itemWidth = dockWidth / TABS.length;
+            const itemCenterX = (idx + 0.5) * itemWidth;
+            const distance = Math.abs(pointerX - itemCenterX);
+            const maxDistance = itemWidth * 1.5;
 
-            {isActive && (
-              <span style={{
-                position: 'absolute',
-                top: 0,
-                width: '28px',
-                height: '3px',
-                background: 'var(--brand-gold)',
-                borderRadius: '0 0 3px 3px'
-              }} />
-            )}
-          </button>
-        );
-      })}
+            if (distance < maxDistance) {
+              const proximity = Math.cos((distance / maxDistance) * (Math.PI / 2));
+              scale = 1 + 0.28 * proximity;
+              translateY = -6 * proximity;
+              magneticX = ((pointerX - itemCenterX) / maxDistance) * 4 * proximity;
+            }
+          }
 
-      {/* Menu / All Nav Tab */}
-      <button
-        onClick={onOpenMenu}
-        style={{
-          background: 'transparent',
-          border: 'none',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '3px',
-          padding: '6px 10px',
-          flex: 1,
-          position: 'relative',
-          cursor: 'pointer',
-          color: 'var(--ink-500)',
-          transition: 'color 0.15s ease'
-        }}
-        title="Open Full Menu"
-      >
-        <Menu size={20} strokeWidth={1.8} />
-        <span style={{ fontSize: '11px', fontWeight: 500 }}>Menu</span>
-      </button>
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveView(tab.id)}
+              className={`bento-dock-item ${isActive ? 'active' : ''}`}
+              style={{
+                transform: `scale(${scale}) translateY(${translateY}px) translateX(${magneticX}px)`,
+                transition: isHovered
+                  ? 'transform 0.08s cubic-bezier(0.2, 0.8, 0.4, 1), background-color 0.18s ease'
+                  : 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.18s ease'
+              }}
+              title={tab.label}
+            >
+              {/* Bento Active Pill Highlight */}
+              {isActive && <div className="bento-dock-pill-bg" />}
+
+              {/* Icon Container with Badge */}
+              <div className="bento-icon-wrapper">
+                <Icon
+                  size={20}
+                  strokeWidth={isActive ? 2.3 : 1.8}
+                  color={isActive ? 'var(--brand-gold)' : 'var(--ink-500)'}
+                />
+
+                {tab.badge && (
+                  <span
+                    className="bento-badge"
+                    style={{ backgroundColor: tab.badgeColor || 'var(--error-500)' }}
+                  >
+                    {tab.badge}
+                  </span>
+                )}
+              </div>
+
+              {/* Label */}
+              <span className={`bento-dock-label ${isActive ? 'active-text' : ''}`}>
+                {tab.label}
+              </span>
+
+              {/* Micro Bento Dot Glow Indicator */}
+              {isActive && <span className="bento-active-dot" />}
+            </button>
+          );
+        })}
+      </div>
     </nav>
   );
 };
