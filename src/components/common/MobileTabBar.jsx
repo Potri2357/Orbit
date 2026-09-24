@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { useOrbit } from '../../context/OrbitContext';
 import {
   LayoutDashboard,
@@ -12,7 +12,7 @@ export const MobileTabBar = () => {
   const { activeView, setActiveView, orders, inventory, channels } = useOrbit();
   const dockRef = useRef(null);
   const [pointerX, setPointerX] = useState(null);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isInteracting, setIsInteracting] = useState(false);
 
   const ordersInProgress = orders.filter(o => ['placed', 'packed'].includes(o.status)).length;
   const lowStockCount = inventory.filter(i => (Number(i.totalAvailable) || 0) <= (Number(i.threshold) || 0)).length;
@@ -44,100 +44,106 @@ export const MobileTabBar = () => {
     }
   ];
 
-  // Magnetic cursor & touch tracking
+  // Magnetic proximity tracking for cursor and touch glide
   const handlePointerMove = (e) => {
     if (!dockRef.current) return;
     const rect = dockRef.current.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     setPointerX(clientX - rect.left);
-    setIsHovered(true);
+    setIsInteracting(true);
   };
 
   const handlePointerLeave = () => {
     setPointerX(null);
-    setIsHovered(false);
+    setIsInteracting(false);
   };
 
   return (
-    <nav
-      ref={dockRef}
-      onMouseMove={handlePointerMove}
-      onMouseLeave={handlePointerLeave}
-      onTouchMove={handlePointerMove}
-      onTouchEnd={handlePointerLeave}
-      className="mobile-tab-bar bento-dock"
-      aria-label="Mobile Navigation Dock"
-    >
-      <div className="bento-dock-inner">
-        {TABS.map((tab, idx) => {
-          const Icon = tab.icon;
-          const isActive = activeView === tab.id;
+    <div className="dynamic-island-dock-container">
+      <nav
+        ref={dockRef}
+        onMouseMove={handlePointerMove}
+        onMouseLeave={handlePointerLeave}
+        onTouchMove={handlePointerMove}
+        onTouchEnd={handlePointerLeave}
+        onTouchCancel={handlePointerLeave}
+        className="dynamic-island-dock"
+        aria-label="Dynamic Island Navigation Dock"
+      >
+        <div className="dynamic-island-track">
+          {TABS.map((tab, idx) => {
+            const Icon = tab.icon;
+            const isActive = activeView === tab.id;
 
-          // Compute magnetic magnification based on pointer proximity
-          let scale = 1;
-          let translateY = 0;
-          let magneticX = 0;
+            // Proximity calculation for magnetic magnification
+            let scale = 1;
+            let translateY = 0;
+            let magneticX = 0;
 
-          if (pointerX !== null && dockRef.current) {
-            const dockWidth = dockRef.current.offsetWidth;
-            const itemWidth = dockWidth / TABS.length;
-            const itemCenterX = (idx + 0.5) * itemWidth;
-            const distance = Math.abs(pointerX - itemCenterX);
-            const maxDistance = itemWidth * 1.5;
+            if (pointerX !== null && dockRef.current) {
+              const dockWidth = dockRef.current.offsetWidth;
+              const approxItemWidth = dockWidth / TABS.length;
+              const itemCenterX = (idx + 0.5) * approxItemWidth;
+              const dist = Math.abs(pointerX - itemCenterX);
+              const maxDist = approxItemWidth * 1.35;
 
-            if (distance < maxDistance) {
-              const proximity = Math.cos((distance / maxDistance) * (Math.PI / 2));
-              scale = 1 + 0.28 * proximity;
-              translateY = -6 * proximity;
-              magneticX = ((pointerX - itemCenterX) / maxDistance) * 4 * proximity;
+              if (dist < maxDist) {
+                const proximity = Math.cos((dist / maxDist) * (Math.PI / 2));
+                scale = 1 + 0.18 * proximity;
+                translateY = -5 * proximity;
+                magneticX = ((pointerX - itemCenterX) / maxDist) * 3 * proximity;
+              }
             }
-          }
 
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveView(tab.id)}
-              className={`bento-dock-item ${isActive ? 'active' : ''}`}
-              style={{
-                transform: `scale(${scale}) translateY(${translateY}px) translateX(${magneticX}px)`,
-                transition: isHovered
-                  ? 'transform 0.08s cubic-bezier(0.2, 0.8, 0.4, 1), background-color 0.18s ease'
-                  : 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.18s ease'
-              }}
-              title={tab.label}
-            >
-              {/* Bento Active Pill Highlight */}
-              {isActive && <div className="bento-dock-pill-bg" />}
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveView(tab.id)}
+                className={`island-tab ${isActive ? 'island-tab-active' : 'island-tab-inactive'}`}
+                style={{
+                  transform: `scale(${scale}) translateY(${translateY}px) translateX(${magneticX}px)`,
+                  transition: isInteracting
+                    ? 'transform 0.08s cubic-bezier(0.2, 0.8, 0.4, 1), background-color 0.25s ease, width 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                    : 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.25s ease, width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                }}
+                title={tab.label}
+              >
+                {/* Active Tab Glow Pill */}
+                {isActive && <div className="island-active-glow" />}
 
-              {/* Icon Container with Badge */}
-              <div className="bento-icon-wrapper">
-                <Icon
-                  size={20}
-                  strokeWidth={isActive ? 2.3 : 1.8}
-                  color={isActive ? 'var(--brand-gold)' : 'var(--ink-500)'}
-                />
+                {/* Tab Icon with notification badge */}
+                <div className="island-icon-box">
+                  <Icon
+                    size={isActive ? 19 : 18}
+                    strokeWidth={isActive ? 2.4 : 1.8}
+                    color={isActive ? 'var(--brand-gold)' : 'var(--ink-500)'}
+                    className="island-icon"
+                  />
 
-                {tab.badge && (
-                  <span
-                    className="bento-badge"
-                    style={{ backgroundColor: tab.badgeColor || 'var(--error-500)' }}
-                  >
-                    {tab.badge}
+                  {tab.badge && (
+                    <span
+                      className="island-badge"
+                      style={{ backgroundColor: tab.badgeColor || 'var(--error-500)' }}
+                    >
+                      {tab.badge}
+                    </span>
+                  )}
+                </div>
+
+                {/* Expanded Label (Visible when active) */}
+                <div className={`island-label-wrapper ${isActive ? 'expanded' : ''}`}>
+                  <span className="island-label">
+                    {tab.label}
                   </span>
-                )}
-              </div>
+                </div>
 
-              {/* Label */}
-              <span className={`bento-dock-label ${isActive ? 'active-text' : ''}`}>
-                {tab.label}
-              </span>
-
-              {/* Micro Bento Dot Glow Indicator */}
-              {isActive && <span className="bento-active-dot" />}
-            </button>
-          );
-        })}
-      </div>
-    </nav>
+                {/* Subtle Active Indicator Dot */}
+                {isActive && <span className="island-active-spark" />}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    </div>
   );
 };
